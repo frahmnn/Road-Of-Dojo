@@ -1,20 +1,37 @@
 package com.frahm.roadofdojo
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        val preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val onboardingCompleted = preferences.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+        val authenticated = preferences.getBoolean(KEY_AUTHENTICATED, false)
+
+        if (!onboardingCompleted) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+            finish()
+            return
         }
+
+        if (!authenticated) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
+        // User sudah lolos onboarding + login, tampilkan halaman utama.
+        setContentView(R.layout.activity_main)
+    }
+
+    companion object {
+        const val PREFS_NAME = "road_of_dojo_prefs"
+        const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        const val KEY_AUTHENTICATED = "authenticated"
     }
 }
